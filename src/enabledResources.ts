@@ -45,6 +45,9 @@ const full = [
   'updateCollectionResponse',
   'transferCollectionResponses',
 
+  // Collection Runner
+  'runCollection',
+
   // Comments
   'createCollectionComment',
   'deleteCollectionComment',
@@ -132,6 +135,9 @@ const full = [
   'getAuthenticatedUser',
   'getTaggedEntities',
 
+  // Code Generation
+  'getCodeGenerationInstructions',
+
   // Transfer
   'transferCollectionFolders',
   'transferCollectionResponses',
@@ -145,7 +151,8 @@ const full = [
   'getDuplicateCollectionTaskStatus',
   'deleteApiCollectionComment',
   'deleteSpecFile',
-  'runCollection',
+  'getEnabledTools',
+  'searchPostmanElements',
 ] as const;
 
 const minimal = [
@@ -188,12 +195,56 @@ const minimal = [
   'duplicateCollection',
   'getStatusOfAnAsyncApiTask',
   'runCollection',
+  'getEnabledTools',
+  'updateCollectionRequest',
 ] as const;
 
-const excludedFromGeneration = ['createCollection', 'putCollection'] as const;
+const code = [
+  'getCodeGenerationInstructions',
+  'getWorkspace',
+  'getWorkspaces',
+  'searchPostmanElements',
+  'getCollectionRequest',
+  'getCollectionResponse',
+  'getCollectionFolder',
+  'getAuthenticatedUser',
+  'getCollection',
+  'getEnvironment',
+  'getEnvironments',
+] as const;
+
+const excludedFromGeneration = [
+  'runCollection',
+  'getEnabledTools',
+  'getCodeGenerationInstructions',
+  'getCollectionMap',
+  'getCollection',
+] as const;
+
+/**
+ * Subtools are tools that are grouped under a parent tool orchestrator.
+ * Each subtool is defined with:
+ * - orchestrator: The main tool that will be exposed (the index.ts file)
+ * - subtools: Array of tools that will be placed in the orchestrator's folder
+ * 
+ * Example structure for 'getCollection':
+ * tools/
+ *   getCollection/
+ *     index.ts          <- orchestrator (handles routing logic)
+ *     getCollection.ts  <- subtool (the actual API call)
+ *     getCollectionMap.ts <- subtool (the map variant)
+ */
+const subtools = {
+  getCollection: {
+    orchestrator: 'getCollection',
+    subtools: ['getCollection', 'getCollectionMap'],
+  },
+} as const;
 
 export const enabledResources = {
   full,
   minimal,
+  code,
   excludedFromGeneration,
+  subtools,
 };

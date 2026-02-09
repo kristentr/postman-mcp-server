@@ -35,6 +35,7 @@ const full = [
     'getCollectionResponse',
     'updateCollectionResponse',
     'transferCollectionResponses',
+    'runCollection',
     'createCollectionComment',
     'deleteCollectionComment',
     'getCollectionComments',
@@ -102,6 +103,7 @@ const full = [
     'getStatusOfAnAsyncApiTask',
     'getAuthenticatedUser',
     'getTaggedEntities',
+    'getCodeGenerationInstructions',
     'transferCollectionFolders',
     'transferCollectionResponses',
     'transferCollectionResponses',
@@ -109,7 +111,8 @@ const full = [
     'getDuplicateCollectionTaskStatus',
     'deleteApiCollectionComment',
     'deleteSpecFile',
-    'runCollection',
+    'getEnabledTools',
+    'searchPostmanElements',
 ];
 const minimal = [
     'createCollection',
@@ -151,10 +154,39 @@ const minimal = [
     'duplicateCollection',
     'getStatusOfAnAsyncApiTask',
     'runCollection',
+    'getEnabledTools',
+    'updateCollectionRequest',
 ];
-const excludedFromGeneration = ['createCollection', 'putCollection'];
+const code = [
+    'getCodeGenerationInstructions',
+    'getWorkspace',
+    'getWorkspaces',
+    'searchPostmanElements',
+    'getCollectionRequest',
+    'getCollectionResponse',
+    'getCollectionFolder',
+    'getAuthenticatedUser',
+    'getCollection',
+    'getEnvironment',
+    'getEnvironments',
+];
+const excludedFromGeneration = [
+    'runCollection',
+    'getEnabledTools',
+    'getCodeGenerationInstructions',
+    'getCollectionMap',
+    'getCollection',
+];
+const subtools = {
+    getCollection: {
+        orchestrator: 'getCollection',
+        subtools: ['getCollection', 'getCollectionMap'],
+    },
+};
 export const enabledResources = {
     full,
     minimal,
+    code,
     excludedFromGeneration,
+    subtools,
 };

@@ -1,10 +1,6 @@
 import { z } from 'zod';
 import { ContentType } from '../clients/postman.js';
-import { McpError, ErrorCode, } from '@modelcontextprotocol/sdk/types.js';
-function asMcpError(error) {
-    const cause = error?.cause ?? String(error);
-    return new McpError(ErrorCode.InternalError, cause);
-}
+import { asMcpError, McpError } from './utils/toolHelpers.js';
 export const method = 'updateMock';
 export const description = 'Updates a mock server.\n- Resource: Mock server entity associated with a collection UID.\n- Use this to change name, environment, privacy, or default server response.\n';
 export const parameters = z.object({
@@ -19,6 +15,9 @@ export const parameters = z.object({
             .describe('If true, the mock server is set private. By default, mock servers are public and can receive requests from anyone and anywhere.')
             .default(false),
         versionTag: z.string().describe("The API's version tag ID.").optional(),
+        collection: z
+            .string()
+            .describe("The associated collection's unique ID. This is a mandatory parameter."),
         config: z
             .object({
             serverResponseId: z
@@ -29,9 +28,6 @@ export const parameters = z.object({
         })
             .describe("The mock server's configuration settings.")
             .optional(),
-        collection: z
-            .string()
-            .describe("The associated collection's unique ID. This is a mandatory parameter."),
     })
         .optional(),
 });

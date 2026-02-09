@@ -1,16 +1,7 @@
 import { z } from 'zod';
 import { PostmanAPIClient, ContentType } from '../clients/postman.js';
-import {
-  IsomorphicHeaders,
-  McpError,
-  ErrorCode,
-  CallToolResult,
-} from '@modelcontextprotocol/sdk/types.js';
-
-function asMcpError(error: unknown): McpError {
-  const cause = (error as any)?.cause ?? String(error);
-  return new McpError(ErrorCode.InternalError, cause);
-}
+import { IsomorphicHeaders, CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { ServerContext, asMcpError, McpError } from './utils/toolHelpers.js';
 
 export const method = 'updateMock';
 export const description =
@@ -29,6 +20,9 @@ export const parameters = z.object({
         )
         .default(false),
       versionTag: z.string().describe("The API's version tag ID.").optional(),
+      collection: z
+        .string()
+        .describe("The associated collection's unique ID. This is a mandatory parameter."),
       config: z
         .object({
           serverResponseId: z
@@ -41,9 +35,6 @@ export const parameters = z.object({
         })
         .describe("The mock server's configuration settings.")
         .optional(),
-      collection: z
-        .string()
-        .describe("The associated collection's unique ID. This is a mandatory parameter."),
     })
     .optional(),
 });
@@ -57,7 +48,7 @@ export const annotations = {
 
 export async function handler(
   args: z.infer<typeof parameters>,
-  extra: { client: PostmanAPIClient; headers?: IsomorphicHeaders }
+  extra: { client: PostmanAPIClient; headers?: IsomorphicHeaders; serverContext?: ServerContext }
 ): Promise<CallToolResult> {
   try {
     const endpoint = `/mocks/${args.mockId}`;

@@ -1,5 +1,6 @@
 import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-import packageJson from '../../package.json' with { type: 'json' };
+import { USER_AGENT } from '../constants.js';
+import { env } from '../env.js';
 export var ContentType;
 (function (ContentType) {
     ContentType["Json"] = "application/json";
@@ -8,10 +9,12 @@ export var ContentType;
 export class PostmanAPIClient {
     baseUrl;
     apiKey;
+    serverContext;
     static instance = null;
-    constructor(apiKey, baseUrl = process.env.POSTMAN_API_BASE_URL || 'https://api.postman.com') {
+    constructor(apiKey, baseUrl = env.POSTMAN_API_BASE_URL, serverContext) {
         this.apiKey = apiKey;
         this.baseUrl = baseUrl;
+        this.serverContext = serverContext;
     }
     static getInstance(apiKey, baseUrl) {
         if (!PostmanAPIClient.instance) {
@@ -38,16 +41,17 @@ export class PostmanAPIClient {
         return this.request(endpoint, { ...options, method: 'DELETE' });
     }
     async request(endpoint, options) {
-        const currentApiKey = this.apiKey || process.env.POSTMAN_API_KEY;
+        const currentApiKey = this.apiKey || env.POSTMAN_API_KEY;
         if (!currentApiKey) {
             throw new Error('API key is required for requests. Provide it via constructor parameter or set POSTMAN_API_KEY environment variable.');
         }
         const contentType = options.contentType || ContentType.Json;
         const userAgentKey = Object.keys(options.headers ?? {}).find((key) => key.toLowerCase() === 'user-agent');
         const userAgentValue = userAgentKey ? options.headers?.[userAgentKey] : undefined;
-        const userAgentHeader = userAgentValue
-            ? `${userAgentValue}/${packageJson.name}/${packageJson.version}`
-            : `${packageJson.name}/${packageJson.version}`;
+        let userAgentHeader = userAgentValue ? `${userAgentValue}/${USER_AGENT}` : USER_AGENT;
+        if (this.serverContext?.serverType) {
+            userAgentHeader = `${userAgentHeader} (toolset: ${this.serverContext.serverType})`;
+        }
         const disallowed = new Set([
             'content-length',
             'transfer-encoding',

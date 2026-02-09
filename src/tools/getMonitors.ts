@@ -1,16 +1,7 @@
 import { z } from 'zod';
 import { PostmanAPIClient } from '../clients/postman.js';
-import {
-  IsomorphicHeaders,
-  McpError,
-  ErrorCode,
-  CallToolResult,
-} from '@modelcontextprotocol/sdk/types.js';
-
-function asMcpError(error: unknown): McpError {
-  const cause = (error as any)?.cause ?? String(error);
-  return new McpError(ErrorCode.InternalError, cause);
-}
+import { IsomorphicHeaders, CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { ServerContext, asMcpError, McpError } from './utils/toolHelpers.js';
 
 export const method = 'getMonitors';
 export const description = 'Gets all monitors.';
@@ -36,6 +27,7 @@ export const parameters = z.object({
   limit: z
     .number()
     .int()
+    .lte(25)
     .describe(
       'The maximum number of rows to return in the response, up to a maximum value of 25. Any value greater than 25 returns a 400 Bad Request response.'
     )
@@ -50,7 +42,7 @@ export const annotations = {
 
 export async function handler(
   args: z.infer<typeof parameters>,
-  extra: { client: PostmanAPIClient; headers?: IsomorphicHeaders }
+  extra: { client: PostmanAPIClient; headers?: IsomorphicHeaders; serverContext?: ServerContext }
 ): Promise<CallToolResult> {
   try {
     const endpoint = `/monitors`;

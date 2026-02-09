@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import { McpError, ErrorCode, } from '@modelcontextprotocol/sdk/types.js';
-function asMcpError(error) {
-    const cause = error?.cause ?? String(error);
-    return new McpError(ErrorCode.InternalError, cause);
-}
+import { asMcpError, McpError } from './utils/toolHelpers.js';
 export const method = 'getMonitors';
 export const description = 'Gets all monitors.';
 export const parameters = z.object({
@@ -26,6 +22,7 @@ export const parameters = z.object({
     limit: z
         .number()
         .int()
+        .lte(25)
         .describe('The maximum number of rows to return in the response, up to a maximum value of 25. Any value greater than 25 returns a 400 Bad Request response.')
         .default(25),
 });
